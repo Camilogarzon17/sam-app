@@ -1,24 +1,26 @@
-version = 0.1
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM App - Función Lambda con API Gateway
 
-[default.pipeline_bootstrap.parameters]
-oidc_provider_url = "https://token.actions.githubusercontent.com"
-oidc_client_id = "sts.amazonaws.com"
-github_org = "camilogarzon17"
-github_repo = "sam-app"
-deployment_branch = "main"
-oidc_provider = "github-actions"
-permissions_provider = "OpenID Connect (OIDC)"
+Globals:
+  Function:
+    Timeout: 3
+    Runtime: python3.9
 
-[dev.pipeline_bootstrap.parameters]
-pipeline_execution_role = "arn:aws:iam::329951443418:role/aws-sam-cli-managed-dev-pipel-PipelineExecutionRole-PSmWRppMvUEA"
-cloudformation_execution_role = "arn:aws:iam::329951443418:role/aws-sam-cli-managed-dev-p-CloudFormationExecutionRo-WPxapUJFlRt6"
-artifacts_bucket = "aws-sam-cli-managed-dev-pipeline-r-artifactsbucket-9jwq7ns543fx"
-image_repository = "329951443418.dkr.ecr.us-west-2.amazonaws.com/aws-sam-cli-managed-dev-pipeline-resources-imagerepository-tos3j0anxavw"
-region = "us-west-2"
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: .
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
 
-[prod.pipeline_bootstrap.parameters]
-pipeline_execution_role = "arn:aws:iam::329951443418:role/aws-sam-cli-managed-prod-pipe-PipelineExecutionRole-vUs20rewn98I"
-cloudformation_execution_role = "arn:aws:iam::329951443418:role/aws-sam-cli-managed-prod--CloudFormationExecutionRo-oofxEN8Ea7ce"
-artifacts_bucket = "aws-sam-cli-managed-prod-pipeline--artifactsbucket-fzqumtxfyzny"
-image_repository = "329951443418.dkr.ecr.us-west-2.amazonaws.com/aws-sam-cli-managed-prod-pipeline-resources-imagerepository-8bdktlvsrkmr"
-region = "us-west-2"
+Outputs:
+  HelloWorldApi:
+    Description: "URL de la función Lambda expuesta por API Gateway"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
